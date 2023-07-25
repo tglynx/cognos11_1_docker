@@ -1,0 +1,42 @@
+version: "3"
+services:
+  mssql:
+    build: ./mssql
+    hostname:  mssql
+    image: hapec-systemx_mssql:latest
+    privileged: true
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    restart: always
+    
+  rs:
+    build:
+      context: ./rs
+      args:
+        SYSTEMX_INSTALLER_URL: ${SYSTEMX_INSTALLER_URL}
+        SYSTEMX_INSTALLER_FILENAME: ${SYSTEMX_INSTALLER_FILENAME}
+        SYSTEMX_REPORTINGSERVER_REPOSITORY_URL: ${SYSTEMX_REPORTINGSERVER_REPOSITORY_URL}
+        SYSTEMX_REPORTINGSERVER_REPOSITORY: ${SYSTEMX_REPORTINGSERVER_REPOSITORY}
+    hostname: rs
+    depends_on:
+      - mssql
+    image: hapec-systemx_rs:11.2.4
+    ports:
+      - "5901:5901"
+      - "6901:6901"
+      - "9300:9300"
+    # environment:
+    #   - SYSTEMX_INSTALLER_URL=${SYSTEMX_INSTALLER_URL}
+    #   - SYSTEMX_INSTALLER_FILENAME=${SYSTEMX_INSTALLER_FILENAME}
+    #   - SYSTEMX_REPORTINGSERVER_REPOSITORY_URL=${SYSTEMX_REPORTINGSERVER_REPOSITORY_URL}
+    #   - SYSTEMX_REPORTINGSERVER_REPOSITORY=${SYSTEMX_REPORTINGSERVER_REPOSITORY}
+#    volumes:
+#      - shared:/shared      
+
+#volumes:
+#  shared:
+#    external: true

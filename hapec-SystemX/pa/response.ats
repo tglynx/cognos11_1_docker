@@ -1,0 +1,46 @@
+; Licensed Materials - Property of IBM
+; BI and PM: is
+; (C) Copyright IBM Corp. 2004, 2011
+; US Government Users Restricted Rights - Use, duplication or disclosure restricted by GSA ADP Schedule Contract with IBM Corp
+[Dialog1]
+Title=Welcome to the Installation Wizard
+DE=1
+EN=0
+FR=0
+JA=0
+ES=0
+NL=0
+SV=0
+FI=0
+IT=0
+PT_BR=0
+KO=0
+ZH_CN=0
+ZH_TW=0
+[Dialog2]
+Title=IBM License Agreement
+;Failure to accept the license agreement and non-IBM terms, if any, will abort the installation.
+;Please return the software to the point of acquisition and obtain a refund, if applicable.
+I Agree=y
+[Dialog3]
+Title=Non IBM License Agreement
+;Failure to accept the license agreement and non-IBM terms, if any, will abort the installation.
+;Please return the software to the point of acquisition and obtain a refund, if applicable.
+I Agree=y
+[Dialog4]
+Title=Installation Location
+APPDIR=/opt/ibm/cognos/tm1_64
+BACKUP=0
+PRODUCTION_RADIO=1
+[Component List]
+TM1APPTIER_APP=1
+TM1SERVER_APP=1
+TM1ADMINSERVER_APP=1
+TM1TOOLS_APP=1
+TM1SAMPLE_APP=1
+PAAAGENT_APP=1
+TM1WEBAPPTIER_APP=1
+TM1CONTRIBGATEWAY_APP=1
+TM1CONTRIBSERVICE_APP=1
+TM1JAVAWEB_APP=1
+CAMSRV_APP=1

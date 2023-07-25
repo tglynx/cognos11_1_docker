@@ -1,0 +1,47 @@
+#!/bin/sh
+set +e
+
+if [[ -z "${COGNOS_WAIT_DB_MINS_DEF}" ]]; then
+  COGNOS_WAIT_DB_MINS=${COGNOS_WAIT_CONTENTSTORE}
+  echo "Using default contentstore wait time ${COGNOS_WAIT_DB_MINS}"
+fi
+
+echo "Renaming cogstartup.xml* files in ${SYSTEMX_REPORTINGSERVER_PATH}"
+mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_backup
+cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_configured ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
+
+echo "--------------------------------------------------------"
+retriesLeft=${COGNOS_MAX_RETRIES}
+CONFIG_STATUS=3
+while [ $retriesLeft -gt 0 -a $CONFIG_STATUS -ne 0 ]; do
+echo "======= Attempting to start Cognos ${retriesLeft} times ========="
+
+waitcnt=${COGNOS_WAIT_DB_MINS}
+while [ $waitcnt -gt 0 ]; do
+	echo "Waiting ${waitcnt} minutes to startup the contentstore database container"
+	sleep 1m
+	waitcnt=$(( $waitcnt - 1 ))
+done
+
+echo "====== Starting System X Reporting Server container logging =================="
+mkdir ${SYSTEMX_REPORTINGSERVER_PATH}/logs
+touch ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log
+tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '{print "Reporting Server:",$0}' &
+
+echo "====== Running Cognos Unattended config =================="
+cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
+./cogconfig.sh -s
+CONFIG_STATUS=$?
+echo "====== Cognos configuration status: ${CONFIG_STATUS} ====="
+if [ $CONFIG_STATUS -ne 0 ]; then
+	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv
+fi
+
+retriesLeft=$(( $retriesLeft - 1 ))
+done
+
+if [ $CONFIG_STATUS -eq 0 ]; then
+	tail -f ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv
+else
+	echo "Too many retries, exiting "
+fi

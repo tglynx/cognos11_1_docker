@@ -1,2 +1,7 @@
 **/media/*
 *.diff
+hapec-SystemX/.env
+hapec-SystemX/rs/.evn
+hapec-SystemX/mssql/.env
+hapec-SystemX/rs/cogstartup.xml_configured
+hapec-SystemX/rs/cogstartup.xml_configured.bak
