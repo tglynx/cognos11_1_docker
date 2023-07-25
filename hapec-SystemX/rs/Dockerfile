@@ -65,7 +65,7 @@ RUN yum install -y \
 	
 #zlib fix for cognos confighuration gui
 RUN cd /opt/ && \
-	curl -# -o zlib-1.2.9.tar.gz https://github.com/madler/zlib/archive/refs/tags/v1.2.9.zip && \
+	curl -# -o zlib-1.2.9.tar.gz https://nextcloud.hapec.de/index.php/s/ZySopiFBkTfkBQk/download && \
 	tar -xzvf zlib-1.2.9.tar.gz && \
 	cd zlib-1.2.9 && \
 	./configure && \
