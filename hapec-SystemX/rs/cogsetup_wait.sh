@@ -1,16 +1,30 @@
 #!/bin/sh
 set +e
 
+echo "Starting System X Reporting Server container ..."
+echo "Configuring System X Service Parameters ..."
+
+mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_backup
+
+# Configure Content Store Username
+xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/username" -v ${SYSTEMX_CONTENTSTORE_USERNAME} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+# Configure Content Store Password
+xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/password" -v ${SYSTEMX_CONTENTSTORE_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+
+cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
+
+echo "Starting System X Reporting Server container logging ..."
+mkdir ${SYSTEMX_REPORTINGSERVER_PATH}/logs
+touch ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log
+tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '{print "\033[33mReporting Server:\033[0m",$0}' &
+
 if [[ -z "${COGNOS_WAIT_DB_MINS_DEF}" ]]; then
   COGNOS_WAIT_DB_MINS=${COGNOS_WAIT_CONTENTSTORE}
   echo "Using default contentstore wait time ${COGNOS_WAIT_DB_MINS}"
 fi
 
-echo "Renaming cogstartup.xml* files in ${SYSTEMX_REPORTINGSERVER_PATH}"
-mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_backup
-cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
-
 echo "--------------------------------------------------------"
+
 retriesLeft=${COGNOS_MAX_RETRIES}
 CONFIG_STATUS=3
 while [ $retriesLeft -gt 0 -a $CONFIG_STATUS -ne 0 ]; do
@@ -23,25 +37,20 @@ while [ $waitcnt -gt 0 ]; do
 	waitcnt=$(( $waitcnt - 1 ))
 done
 
-echo "====== Starting System X Reporting Server container logging =================="
-mkdir ${SYSTEMX_REPORTINGSERVER_PATH}/logs
-touch ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log
-tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '{print "Reporting Server:",$0}' &
-
 echo "====== Running Cognos Unattended config =================="
 cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
 ./cogconfig.sh -s
 CONFIG_STATUS=$?
 echo "====== Cognos configuration status: ${CONFIG_STATUS} ====="
 if [ $CONFIG_STATUS -ne 0 ]; then
-	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv
+	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '{print "\033[32mReporting Server Configuration:\033[0m",$0}'
 fi
 
 retriesLeft=$(( $retriesLeft - 1 ))
 done
 
 if [ $CONFIG_STATUS -eq 0 ]; then
-	tail -f ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv
+	tail -f ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '{print "\032[33mReporting Server Configuration:\033[0m",$0}'
 else
 	echo "Too many retries, exiting "
 fi

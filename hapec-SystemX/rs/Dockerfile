@@ -21,8 +21,8 @@ ENV COGNOS_MAX_RETRIES 1
 ENV SYSTEMX_BASEPATH /opt/hapec/SystemX
 ENV SYSTEMX_REPORTINGSERVER_PATH ${SYSTEMX_BASEPATH}/ReportingServer
 
-ARG SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
-ARG SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
+#ARG SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
+#ARG SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
 
 ARG COGNOS_USER=cognosusr
 ARG COGNOS_PW=password
@@ -41,8 +41,6 @@ ARG SYSTEMX_INSTALLER_FILENAME=${SYSTEMX_INSTALLER_FILENAME}
 # IBM Cognos Analytics Server 
 ARG SYSTEMX_REPORTINGSERVER_REPOSITORY_URL=${SYSTEMX_REPORTINGSERVER_REPOSITORY_URL}
 ARG SYSTEMX_REPORTINGSERVER_REPOSITORY=${SYSTEMX_REPORTINGSERVER_REPOSITORY}
-
-RUN echo ${SYSTEMX_CONTENTSTORE_USERNAME} && echo ${SYSTEMX_CONTENTSTORE_PASSWORD}
 
 # Cognos Prepreq (See https://www.ibm.com/support/knowledgecenter/en/SS5R93_5.3.0/com.ibm.spectrum.sc.doc/ins_cognos_analytics_Linux_single.html)
 # - glibc-2.12-1.166.el6 or later (both i686 and x86_64 packages)
@@ -140,17 +138,16 @@ ENV JAVA_HOME ${SYSTEMX_REPORTINGSERVER_PATH}/ibm-jre/jre
 # Setup unattended configuration on container start
 #See https://www.ibm.com/support/knowledgecenter/en/SSEP7J_11.0.0/com.ibm.swg.ba.cognos.inst_cr_winux.doc/t_unatt_cnfg.html#unatt_cnfg
 COPY cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/
+RUN	chown -R ${COGNOS_USER}:${COGNOS_USER} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
 
+# should be done in run phase of the container by environment variables
 # Configure Content Store Username
-RUN xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/username" -v ${SYSTEMX_CONTENTSTORE_USERNAME} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
-
+# RUN xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/username" -v ${SYSTEMX_CONTENTSTORE_USERNAME} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
 # Configure Content Store Password
-RUN xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/password" -v ${SYSTEMX_CONTENTSTORE_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+# RUN xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/password" -v ${SYSTEMX_CONTENTSTORE_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
 
 COPY cogsetup_wait.sh /dockerstartup/
-RUN \
-	sed -i 's/\r//g' /dockerstartup/cogsetup_wait.sh && \
-	chmod uo+x /dockerstartup/*.sh
+RUN chmod uo+x /dockerstartup/*.sh
 		
 # Cognos UI port
 EXPOSE 9300
