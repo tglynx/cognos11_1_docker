@@ -8,7 +8,7 @@ fi
 
 echo "Renaming cogstartup.xml* files in ${SYSTEMX_REPORTINGSERVER_PATH}"
 mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_backup
-cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_configured ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
+cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
 
 echo "--------------------------------------------------------"
 retriesLeft=${COGNOS_MAX_RETRIES}

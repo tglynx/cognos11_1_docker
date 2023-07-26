@@ -17,8 +17,12 @@ ENV COGNOS_WAIT_CONTENTSTORE 1
 
 # Cognos settings
 ENV COGNOS_MAX_RETRIES 1
+
 ENV SYSTEMX_BASEPATH /opt/hapec/SystemX
 ENV SYSTEMX_REPORTINGSERVER_PATH ${SYSTEMX_BASEPATH}/ReportingServer
+
+ARG SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
+ARG SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
 
 ARG COGNOS_USER=cognosusr
 ARG COGNOS_PW=password
@@ -38,6 +42,7 @@ ARG SYSTEMX_INSTALLER_FILENAME=${SYSTEMX_INSTALLER_FILENAME}
 ARG SYSTEMX_REPORTINGSERVER_REPOSITORY_URL=${SYSTEMX_REPORTINGSERVER_REPOSITORY_URL}
 ARG SYSTEMX_REPORTINGSERVER_REPOSITORY=${SYSTEMX_REPORTINGSERVER_REPOSITORY}
 
+RUN echo ${SYSTEMX_CONTENTSTORE_USERNAME} && echo ${SYSTEMX_CONTENTSTORE_PASSWORD}
 
 # Cognos Prepreq (See https://www.ibm.com/support/knowledgecenter/en/SS5R93_5.3.0/com.ibm.spectrum.sc.doc/ins_cognos_analytics_Linux_single.html)
 # - glibc-2.12-1.166.el6 or later (both i686 and x86_64 packages)
@@ -53,7 +58,6 @@ RUN yum install -y \
 	unzip \
 	sudo \
 	nano \
-	rsync \
 	glibc.x86_64 glibc.i686 glibc-langpack-en \
 	libstdc++.x86_64 libstdc++.i686 \
 	libXtst libX11.so.6 libnsl libnsl.so.1 libstdc++.so.6 \
@@ -61,6 +65,7 @@ RUN yum install -y \
 	nss.x86_64 nss.i686 \
 	motif.i686 motif.x86_64 \
 	gedit \
+	xmlstarlet \
 	&& yum clean all && rm -rf /tmp/*
 	
 #zlib fix for cognos confighuration gui
@@ -117,9 +122,9 @@ RUN	echo REPO=${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_REPORTINGSERVER_REPOSITORY} >
 RUN	echo "BUILD_HOST=`hostname`"> ${SYSTEMX_BASEPATH}/build_host.txt 
 RUN su - ${COGNOS_USER} -c "\"${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_INSTALLER_FILENAME}\" -f \"${SYSTEMX_REPOSITORY_PATH}/${COGNOS_PROPERTIES}\" -i silent"	
 
-RUN	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_`hostname` 
-RUN	sed -i "s/`hostname`/${COGNOS_HOST}/g" ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml 
-RUN	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_${COGNOS_HOST}
+# RUN	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_`hostname` 
+# RUN	sed -i "s/`hostname`/${COGNOS_HOST}/g" ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml 
+# RUN	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_${COGNOS_HOST}
 
 # Copy Microsoft SQL Server jar
 COPY /media/mssql-jdbc-7.4.1.jre8.jar ${SYSTEMX_REPORTINGSERVER_PATH}/drivers/
@@ -134,7 +139,14 @@ ENV JAVA_HOME ${SYSTEMX_REPORTINGSERVER_PATH}/ibm-jre/jre
 	
 # Setup unattended configuration on container start
 #See https://www.ibm.com/support/knowledgecenter/en/SSEP7J_11.0.0/com.ibm.swg.ba.cognos.inst_cr_winux.doc/t_unatt_cnfg.html#unatt_cnfg
-COPY cogstartup.xml_configured ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/
+COPY cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/
+
+# Configure Content Store Username
+RUN xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/username" -v ${SYSTEMX_CONTENTSTORE_USERNAME} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+
+# Configure Content Store Password
+RUN xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/password" -v ${SYSTEMX_CONTENTSTORE_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+
 COPY cogsetup_wait.sh /dockerstartup/
 RUN \
 	sed -i 's/\r//g' /dockerstartup/cogsetup_wait.sh && \
@@ -149,5 +161,5 @@ COPY ["Reporting Server Configuration.desktop", "/headless/Desktop/"]
 # Switch back to regular user
 USER 1000
 
-# Kick-off unattended Cognos configuration
+# Start Command for the container - Kick-off unattended Cognos configuration
 CMD ["/dockerstartup/cogsetup_wait.sh"]
