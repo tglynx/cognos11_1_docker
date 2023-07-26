@@ -16,7 +16,11 @@ cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTE
 echo "Starting System X Reporting Server container logging ..."
 mkdir ${SYSTEMX_REPORTINGSERVER_PATH}/logs
 touch ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log
-tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '{print "\033[33mReporting Server:\033[0m",$0}' &
+tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '
+	$2 ~ /INFO/ {print "\033[37m" $0 "\033[0m"}
+	$2 ~ /ERROR/ {print "\033[31m" $0 "\033[0m"}
+	!( $2 ~ /INFO/ || $2 ~ /ERROR/ ) {print $0}
+	' |awk '{print "\033[33mReporting Server:\033[0m",$0}' &
 
 if [[ -z "${COGNOS_WAIT_DB_MINS_DEF}" ]]; then
   COGNOS_WAIT_DB_MINS=${COGNOS_WAIT_CONTENTSTORE}
@@ -43,14 +47,26 @@ cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
 CONFIG_STATUS=$?
 echo "====== Cognos configuration status: ${CONFIG_STATUS} ====="
 if [ $CONFIG_STATUS -ne 0 ]; then
-	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '{print "\033[32mReporting Server Configuration:\033[0m",$0}'
+	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
+		/INFO/ {print "\033[37m" $0 "\033[0m"}
+		/SUCCESS/ {print "\033[32m" $0 "\033[0m"}
+		/WARNING/ {print "\033[33m" $0 "\033[0m"}
+		/ERROR/ {print "\033[31m" $0 "\033[0m"}
+		/EXEC/ {print "\033[36m" $0 "\033[0m"}
+		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print $0}' | awk '{print "\033[32mReporting Server Configuration:\033[0m",$0}'
 fi
 
 retriesLeft=$(( $retriesLeft - 1 ))
 done
 
 if [ $CONFIG_STATUS -eq 0 ]; then
-	tail -f ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '{print "\032[33mReporting Server Configuration:\033[0m",$0}'
+	tail -n+0 -f ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
+		/INFO/ {print "\033[37m" $0 "\033[0m"}
+		/SUCCESS/ {print "\033[32m" $0 "\033[0m"}
+		/WARNING/ {print "\033[33m" $0 "\033[0m"}
+		/ERROR/ {print "\033[31m" $0 "\033[0m"}
+		/EXEC/ {print "\033[36m" $0 "\033[0m"}
+		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print $0}' | awk '{print "\033[32mReporting Server Configuration:\033[0m",$0}'
 else
 	echo "Too many retries, exiting "
 fi
