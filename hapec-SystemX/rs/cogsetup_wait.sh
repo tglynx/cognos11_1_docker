@@ -20,7 +20,7 @@ tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '
 	$2 ~ /INFO/ {print "\033[37m" $0 "\033[0m"}
 	$2 ~ /ERROR/ {print "\033[31m" $0 "\033[0m"}
 	!( $2 ~ /INFO/ || $2 ~ /ERROR/ ) {print $0}
-	' |awk '{print "\033[33mReporting Server:\033[0m",$0}' &
+	' | awk '{print "\033[33mReporting Server:\033[0m",$0}' &
 
 if [[ -z "${COGNOS_WAIT_DB_MINS_DEF}" ]]; then
   COGNOS_WAIT_DB_MINS=${COGNOS_WAIT_CONTENTSTORE}
