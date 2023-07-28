@@ -36,6 +36,8 @@ services:
       - "5901:5901"
       - "6901:6901"
       - "9300:9300"
+    volumes:
+      - rs-configuration:/opt/hapec/SystemX/ReportingServer/configuration
     stop_grace_period: 300s
     environment:
        - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
@@ -50,3 +52,4 @@ services:
 
 volumes:
   mssql-data:
+  rs-configuration:
