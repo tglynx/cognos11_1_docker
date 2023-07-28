@@ -4,7 +4,7 @@ services:
     build: ./mssql
     init: true
     hostname:  mssql
-    image: hapec-systemx_mssql:latest
+    image: systemx-contentstore:latest
     privileged: true
     ports:
       - "1433:1433"
@@ -31,13 +31,14 @@ services:
     hostname: rs
     depends_on:
       - mssql
-    image: hapec-systemx_rs:11.2.4.1.1
+    image: systemx-reportingserver:11.2.4.1.1
     ports:
       - "5901:5901"
       - "6901:6901"
       - "9300:9300"
     volumes:
       - rs-configuration:/opt/hapec/SystemX/ReportingServer/configuration
+      - rs-data:/opt/hapec/SystemX/ReportingServer/data
     stop_grace_period: 300s
     environment:
        - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
@@ -53,3 +54,4 @@ services:
 volumes:
   mssql-data:
   rs-configuration:
+  rs-data:
