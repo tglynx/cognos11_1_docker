@@ -9,6 +9,7 @@ services:
       - "1433:1433"
     volumes:
       - mssql-data:/var/opt/mssql
+    stop_grace_period: 120s
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
@@ -34,6 +35,7 @@ services:
       - "5901:5901"
       - "6901:6901"
       - "9300:9300"
+    stop_grace_period: 300s
     environment:
        - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
        - SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}

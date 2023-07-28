@@ -15,12 +15,12 @@ tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '
   }
 
   $2 ~ /INFO/ {
-    print "\033[33mReporting Server:\033[0m\033[37m" removeWhiteSpace($0) "\033[0m";
+    print "\033[33mReporting Server:\033[0m \033[37m" removeWhiteSpace($0) "\033[0m";
     next;
   }
 
   $2 ~ /ERROR/ {
-    print "\033[33mReporting Server:\033[0m\033[31m" removeWhiteSpace($0) "\033[0m";
+    print "\033[33mReporting Server:\033[0m \033[31m" removeWhiteSpace($0) "\033[0m";
     next;
   }
 
@@ -34,7 +34,10 @@ echo -e "Starting System X Reporting Server container logging \033[32m[done]\033
 
 echo -e "Configuring System X Reporting Server according to container environment \033[36m[executing]\033[0m"
 
-mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_backup.xml
+echo -e "Creating System X Reporting Server container logging \033[36m[executing]\033[0m"
+mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml \
+   ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_backup_$(date +'%Y%m%d_%H%M%S').xml
+echo -e "Starting System X Reporting Server container logging \033[32m[done]\033[0m"
 
 #COFIG EXPORT (UNENCRYPTED)
 # echo -e "Configuring System X Reporting Server with according to container environment \033[36m[executing]\033[0m"
@@ -132,7 +135,7 @@ while [ $retriesLeft -gt 0 -a $CONFIG_STATUS -ne 0 ]; do
 	cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
 	./cogconfig.sh -s
 	CONFIG_STATUS=$?
-	echo "System X Reporting Server configuration status: ${CONFIG_STATUS}"
+	echo -e "\nSystem X Reporting Server configuration status: ${CONFIG_STATUS}"
 	if [ $CONFIG_STATUS -ne 0 ]; then
 		cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
 		/INFO/ {print "\033[32mReporting Server Configuration:\033[0m \033[37m" $0 "\033[0m"}
@@ -158,7 +161,7 @@ if [ $CONFIG_STATUS -eq 0 ]; then
 		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print "\033[32mReporting Server Configuration:\033[0m",$0}'
 
 else
-	echo -e "Starting System X Reporting Server - too many retries \033[32m[failed]\033[0m"
+	echo -e "Starting System X Reporting Server - too many retries \033[31m[failed]\033[0m"
 	kill -TERM "$SystemXLoggerPID" 2>/dev/null
 fi
 
@@ -166,12 +169,12 @@ echo -e "Preparing System X Reporting Server container SIGTERM handling \033[36m
 # Prepare for SIGTERM
 #Define cleanup procedure
 term_handler() {
-    echo -e "Stopping System X Reporting Server - recieved SIGTERM \033[36m[executing]\033[0m"
+    echo -e "\nStopping System X Reporting Server - recieved SIGTERM \033[36m[executing]\033[0m"
 
 	cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
 	./cogconfig.sh -stop
 	CONFIG_STATUS=$?
-	echo "System X Reporting Server configuration status: ${CONFIG_STATUS}"
+	echo -e "\nSystem X Reporting Server configuration status: ${CONFIG_STATUS}"
 
 	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
 		/INFO/ {print "\033[32mReporting Server Configuration:\033[0m \033[37m" $0 "\033[0m"}
@@ -183,10 +186,6 @@ term_handler() {
 
 	echo -e "Stopping System X Reporting Server \033[32m[done]\033[0m"
 
-	echo "sleeping..."
-	sleep 1m
-	echo "ende..."
-
 	#kill -TERM "$SystemXLoggerPID" 2>/dev/null
 	
 }
@@ -197,3 +196,5 @@ echo -e "Preparing System X Reporting Server container SIGTERM handling \033[32m
 echo -e "Starting System X Reporting Server - container is ready \033[32m[done]\033[0m"
 
 wait "$SystemXLoggerPID"
+
+echo -e "System X Reporting Server - container is down \033[31m[stopped]\033[0m"

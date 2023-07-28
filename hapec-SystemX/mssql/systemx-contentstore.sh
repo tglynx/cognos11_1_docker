@@ -1,8 +1,4 @@
 echo -e "Checking for System X Content Store database \033[33m[waiting]\033[0m"
-# sleep 20s
-# #tail -n+0 /var/opt/mssql/log/errorlog | awk '{print "\033[34mContent Store:\033[0m",$0}'
-# sleep 20s
-# echo -e "System X Content Store Database server is ready! \033[32m[continue]\033[0m"
 
 HOST="localhost"
 PORT="1433"
@@ -10,7 +6,7 @@ PORT="1433"
 while true; do
   nc -z -w1 "$HOST" "$PORT"
   if [ $? -eq 0 ]; then
-    echo -e "System X Content Store Database server is ready! \033[32m[continue]\033[0m"
+    echo -e "\nSystem X Content Store Database server is ready! \033[32m[continue]\033[0m"
 	break
   else
     echo -e "System X Content Store Database server is not ready yet! \033[33m[waiting]\033[0m"
