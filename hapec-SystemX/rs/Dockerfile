@@ -143,8 +143,14 @@ ENV JAVA_HOME ${SYSTEMX_REPORTINGSERVER_PATH}/ibm-jre/jre
 	
 # Setup unattended configuration on container start
 #See https://www.ibm.com/support/knowledgecenter/en/SSEP7J_11.0.0/com.ibm.swg.ba.cognos.inst_cr_winux.doc/t_unatt_cnfg.html#unatt_cnfg
+
 COPY cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+
+RUN mkdir ${SYSTEMX_REPORTINGSERVER_PATH}/data
+
+# Set modified path credentials
 RUN	chown -R ${COGNOS_USER}:${COGNOS_USER} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration
+RUN	chown -R ${COGNOS_USER}:${COGNOS_USER} ${SYSTEMX_REPORTINGSERVER_PATH}/data
 
 # should be done in run phase of the container by environment variables
 # Configure Content Store Username
