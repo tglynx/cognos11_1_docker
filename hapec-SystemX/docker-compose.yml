@@ -7,11 +7,14 @@ services:
     privileged: true
     ports:
       - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
       - MSSQL_PID=Express
     restart: always
+
     
   rs:
     build:
@@ -26,12 +29,13 @@ services:
     hostname: rs
     depends_on:
       - mssql
-    image: hapec-systemx_rs:11.2.4
+    image: hapec-systemx_rs:11.2.4.1.1
     ports:
       - "5901:5901"
       - "6901:6901"
       - "9300:9300"
     environment:
+       - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
        - SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
        - SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
     #   - SYSTEMX_INSTALLER_URL=${SYSTEMX_INSTALLER_URL}
@@ -41,6 +45,5 @@ services:
 #    volumes:
 #      - shared:/shared      
 
-#volumes:
-#  shared:
-#    external: true
+volumes:
+  mssql-data:

@@ -1,5 +1,13 @@
 FROM mcr.microsoft.com/mssql/server:2022-latest
 
+USER root
+
+RUN apt-get -y update  && \
+        apt-get install -y netcat && \
+        apt-get clean
+
+USER mssql
+
 RUN mkdir -p /usr/mssql
 WORKDIR /usr/mssql
 

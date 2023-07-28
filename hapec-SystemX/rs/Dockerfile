@@ -13,7 +13,7 @@ USER 0
 # Based on RHEL Dockerfile from dnastaci@us.ibm.com
 
 # How long to wait for contentstore database to come up, default (in minutes)
-ENV COGNOS_WAIT_CONTENTSTORE 1 	
+#ENV COGNOS_WAIT_CONTENTSTORE 1 	
 
 # Cognos settings
 ENV COGNOS_MAX_RETRIES 1
@@ -64,7 +64,13 @@ RUN yum install -y \
 	motif.i686 motif.x86_64 \
 	gedit \
 	xmlstarlet \
-	&& yum clean all && rm -rf /tmp/*
+	nc 
+
+RUN curl -# https://packages.microsoft.com/config/rhel/8/prod.repo > /etc/yum.repos.d/mssql-release.repo
+
+RUN ACCEPT_EULA=Y yum install -y mssql-tools
+
+RUN yum clean all && rm -rf /tmp/*
 	
 #zlib fix for cognos confighuration gui
 RUN cd /opt/ && \
@@ -137,8 +143,8 @@ ENV JAVA_HOME ${SYSTEMX_REPORTINGSERVER_PATH}/ibm-jre/jre
 	
 # Setup unattended configuration on container start
 #See https://www.ibm.com/support/knowledgecenter/en/SSEP7J_11.0.0/com.ibm.swg.ba.cognos.inst_cr_winux.doc/t_unatt_cnfg.html#unatt_cnfg
-COPY cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/
-RUN	chown -R ${COGNOS_USER}:${COGNOS_USER} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+COPY cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+RUN	chown -R ${COGNOS_USER}:${COGNOS_USER} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration
 
 # should be done in run phase of the container by environment variables
 # Configure Content Store Username
@@ -157,6 +163,19 @@ COPY ["Reporting Server Configuration.desktop", "/headless/Desktop/"]
 
 # Switch back to regular user
 USER 1000
+
+# RUN echo "====== Config validation ==================" && \
+# cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64 && \
+# ./cogconfig.sh -e ../configuration/cogstartup_unencrypted.xml && \
+# CONFIG_STATUS=$? && \
+# echo "====== Cognos configuration status: ${CONFIG_STATUS} =====" && \
+# cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk ' \
+# 		/INFO/ {print "\033[37m" $0 "\033[0m"} \
+# 		/SUCCESS/ {print "\033[32m" $0 "\033[0m"} \
+# 		/WARNING/ {print "\033[33m" $0 "\033[0m"} \
+# 		/ERROR/ {print "\033[31m" $0 "\033[0m"} \
+# 		/EXEC/ {print "\033[36m" $0 "\033[0m"} \
+# 		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print $0}' | awk '{print "\033[32mReporting Server Configuration:\033[0m",$0}' 
 
 # Start Command for the container - Kick-off unattended Cognos configuration
 CMD ["/dockerstartup/cogsetup_wait.sh"]
