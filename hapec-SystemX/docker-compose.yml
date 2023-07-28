@@ -2,6 +2,7 @@ version: "3"
 services:
   mssql:
     build: ./mssql
+    init: true
     hostname:  mssql
     image: hapec-systemx_mssql:latest
     privileged: true

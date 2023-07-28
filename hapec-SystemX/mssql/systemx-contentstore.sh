@@ -17,4 +17,3 @@ done
 echo -e "Checking System X Content Store Database! \033[36m[executing]\033[0m"
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${MSSQL_SA_PASSWORD} -i create-contentstore.sql
 echo -e "Checking System X Content Store Database! \033[32m[done]\033[0m"
-echo -e "Starting Microsoft SQL-Server Express on Linux (2019) - System X Content Store database \033[32m[done]\033[0m"
