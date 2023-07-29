@@ -1,3 +1,4 @@
+#######################################################################################################
 # Dockerfile based on Dockerfile from Philippe Gregoire (philippe.gregoire@fr.ibm.com)
 # Base Image
 FROM consol/rocky-xfce-vnc
@@ -9,20 +10,14 @@ EXPOSE 5901 6901
 USER 0
 
 #######################################################################################################
-# Cognos setup
+# IBM Cognos Analytics
 # Based on RHEL Dockerfile from dnastaci@us.ibm.com
-
-# How long to wait for contentstore database to come up, default (in minutes)
-#ENV COGNOS_WAIT_CONTENTSTORE 1 	
 
 # Cognos settings
 ENV COGNOS_MAX_RETRIES 1
 
 ENV SYSTEMX_BASEPATH /opt/hapec/SystemX
 ENV SYSTEMX_REPORTINGSERVER_PATH ${SYSTEMX_BASEPATH}/ReportingServer
-
-#ARG SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
-#ARG SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
 
 ARG COGNOS_USER=cognosusr
 ARG COGNOS_PW=password
