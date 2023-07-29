@@ -3,7 +3,7 @@
 #start SQL Server, start the script to create the DB and import the data, start the app
 echo -e  "Starting Microsoft SQL-Server Express on Linux (2019) - System X Content Store database \033[36m[executing]\033[0m"
 
-/opt/mssql/bin/sqlservr | tr -d '\r' & 
+/opt/mssql/bin/sqlservr | stdbuf --output=L tr -d '\r' & 
 SystemXSQLServerPID=$!
 
 /usr/mssql/systemx-contentstore.sh & 

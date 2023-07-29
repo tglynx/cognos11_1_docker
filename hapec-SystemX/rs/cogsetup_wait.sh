@@ -4,11 +4,12 @@ set +e
 echo -e "Starting System X Reporting Server container \033[36m[executing]\033[0m"
 
 echo -e "Starting System X Reporting Server container logging \033[36m[executing]\033[0m"
-mkdir ${SYSTEMX_REPORTINGSERVER_PATH}/logs
-touch ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log
+[ ! -d "${SYSTEMX_REPORTINGSERVER_PATH}/logs" ] && mkdir "${SYSTEMX_REPORTINGSERVER_PATH}/logs"
+[ ! -d "${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log" ] && touch "${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log"
+[ ! -d "${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogaudit.log" ] && touch "${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogaudit.log"
 
 #container background Task
-tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '
+tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | stdbuf --output=L awk '
   function removeWhiteSpace(str) {
     gsub(/[[:space:]]{3,}/, "   ", str);
     return str;
@@ -30,16 +31,33 @@ tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cognosserver.log | awk '
 ' &
 SystemXLoggerPID=$!
 
+tail -f -n 0 ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogaudit.log | stdbuf --output=L awk '
+function removeWhiteSpace(str) {
+    gsub(/[[:space:]]{3,}/, "   ", str);
+    return str;
+}
+
+{
+    if ($0 ~ /DPR-SYS-6000/) {
+        gsub(/DPR-SYS-6000/, "\033[97m\033[42m&\033[0m");
+    }
+    print "\033[34mService Audit:\033[0m", removeWhiteSpace($0);
+}
+' &
+
 echo -e "Starting System X Reporting Server container logging \033[32m[done]\033[0m"
 
 echo -e "Configuring System X Reporting Server according to container environment \033[36m[executing]\033[0m"
 
-echo -e "Creating System X Reporting Server container logging \033[36m[executing]\033[0m"
-mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml \
-   ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_backup_$(date +'%Y%m%d_%H%M%S').xml
-echo -e "Starting System X Reporting Server container logging \033[32m[done]\033[0m"
+# Set SYSTEMX_RS_STARTUP to true if it is unset or null
+SYSTEMX_RS_STARTUP=${SYSTEMX_RS_STARTUP:-true}
 
-#COFIG EXPORT (UNENCRYPTED)
+echo -e "Backup System X Reporting Server configuration \033[36m[executing]\033[0m"
+cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml \
+   ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_backup_$(date +'%Y%m%d_%H%M%S').xml
+echo -e "Backup System X Reporting Server configuration \033[32m[done]\033[0m"
+
+#CONFIG EXPORT (UNENCRYPTED)
 # echo -e "Configuring System X Reporting Server with according to container environment \033[36m[executing]\033[0m"
 # cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
 # ./cogconfig.sh -e ../configuration/cogstartup_unencrypted.xml
@@ -59,7 +77,7 @@ echo -e "Starting System X Reporting Server container logging \033[32m[done]\033
 
 # Check if the template file exists
 if [ -e "${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml" ]; then
-    echo -e "Performing initial System X Reporting Server configuration accoring to docker image \033[36m[executing]\033[0m"
+    echo -e "Performing initial System X Reporting Server configuration according to docker image \033[36m[executing]\033[0m"
 
 	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_image_template.xml
 
@@ -119,51 +137,57 @@ while true; do
   sleep 1
 done
 
-retriesLeft=${COGNOS_MAX_RETRIES}
-CONFIG_STATUS=3
-while [ $retriesLeft -gt 0 -a $CONFIG_STATUS -ne 0 ]; do
-	
-	echo -e "Starting System X Reporting Server - retries left: " ${retiresLeft} " \033[36m[executing]\033[0m"
+if [ $SYSTEMX_RS_STARTUP = true ]; then
+	## START IBM COGNOS ANALYTICS ##
+	retriesLeft=${COGNOS_MAX_RETRIES}
+	CONFIG_STATUS=3
+	while [ $retriesLeft -gt 0 -a $CONFIG_STATUS -ne 0 ]; do
+		
+		echo -e "Starting System X Reporting Server - retries left: " ${retiresLeft} " \033[36m[executing]\033[0m"
 
-	#waitcnt=${COGNOS_WAIT_DB_MINS}
-	#while [ $waitcnt -gt 0 ]; do
-	#	echo "Waiting ${waitcnt} minutes to startup the contentstore database container"
-	#	sleep 1m
-	#	waitcnt=$(( $waitcnt - 1 ))
-	#done
+		#waitcnt=${COGNOS_WAIT_DB_MINS}
+		#while [ $waitcnt -gt 0 ]; do
+		#	echo "Waiting ${waitcnt} minutes to startup the contentstore database container"
+		#	sleep 1m
+		#	waitcnt=$(( $waitcnt - 1 ))
+		#done
 
-	cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
-	./cogconfig.sh -s
-	CONFIG_STATUS=$?
-	echo -e "\nSystem X Reporting Server configuration status: ${CONFIG_STATUS}"
-	if [ $CONFIG_STATUS -ne 0 ]; then
+		cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
+		./cogconfig.sh -s
+		CONFIG_STATUS=$?
+		echo -e "\nSystem X Reporting Server configuration status: ${CONFIG_STATUS}"
+		if [ $CONFIG_STATUS -ne 0 ]; then
+			cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
+			/INFO/ {print "\033[32mReporting Server Configuration:\033[0m \033[37m" $0 "\033[0m"}
+			/SUCCESS/ {print "\033[32mReporting Server Configuration:\033[0m \033[32m" $0 "\033[0m"}
+			/WARNING/ {print "\033[32mReporting Server Configuration:\033[0m \033[33m" $0 "\033[0m"}
+			/ERROR/ {print "\033[32mReporting Server Configuration:\033[0m \033[31m" $0 "\033[0m"}
+			/EXEC/ {print "\033[32mReporting Server Configuration:\033[0m \033[36m" $0 "\033[0m"}
+			!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print "\033[32mReporting Server Configuration:\033[0m",$0}'
+		fi
+
+		retriesLeft=$(( $retriesLeft - 1 ))
+
+	done
+
+	if [ $CONFIG_STATUS -eq 0 ]; then
+		
 		cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
-		/INFO/ {print "\033[32mReporting Server Configuration:\033[0m \033[37m" $0 "\033[0m"}
-		/SUCCESS/ {print "\033[32mReporting Server Configuration:\033[0m \033[32m" $0 "\033[0m"}
-		/WARNING/ {print "\033[32mReporting Server Configuration:\033[0m \033[33m" $0 "\033[0m"}
-		/ERROR/ {print "\033[32mReporting Server Configuration:\033[0m \033[31m" $0 "\033[0m"}
-		/EXEC/ {print "\033[32mReporting Server Configuration:\033[0m \033[36m" $0 "\033[0m"}
-		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print "\033[32mReporting Server Configuration:\033[0m",$0}'
+			/INFO/ {print "\033[32mReporting Server Configuration:\033[0m \033[37m" $0 "\033[0m"}
+			/SUCCESS/ {print "\033[32mReporting Server Configuration:\033[0m \033[32m" $0 "\033[0m"}
+			/WARNING/ {print "\033[32mReporting Server Configuration:\033[0m \033[33m" $0 "\033[0m"}
+			/ERROR/ {print "\033[32mReporting Server Configuration:\033[0m \033[31m" $0 "\033[0m"}
+			/EXEC/ {print "\033[32mReporting Server Configuration:\033[0m \033[36m" $0 "\033[0m"}
+			!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print "\033[32mReporting Server Configuration:\033[0m",$0}'
+
+	else
+		echo -e "Starting System X Reporting Server - too many retries \033[31m[failed]\033[0m"
+		kill -TERM "$SystemXLoggerPID" 2>/dev/null
 	fi
-
-	retriesLeft=$(( $retriesLeft - 1 ))
-
-done
-
-if [ $CONFIG_STATUS -eq 0 ]; then
-	
-	cat ${SYSTEMX_REPORTINGSERVER_PATH}/logs/cogconfig_response.csv | awk '
-		/INFO/ {print "\033[32mReporting Server Configuration:\033[0m \033[37m" $0 "\033[0m"}
-		/SUCCESS/ {print "\033[32mReporting Server Configuration:\033[0m \033[32m" $0 "\033[0m"}
-		/WARNING/ {print "\033[32mReporting Server Configuration:\033[0m \033[33m" $0 "\033[0m"}
-		/ERROR/ {print "\033[32mReporting Server Configuration:\033[0m \033[31m" $0 "\033[0m"}
-		/EXEC/ {print "\033[32mReporting Server Configuration:\033[0m \033[36m" $0 "\033[0m"}
-		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print "\033[32mReporting Server Configuration:\033[0m",$0}'
-
+	## END START IBM COGNOS ANaLYTICS ##
 else
-	echo -e "Starting System X Reporting Server - too many retries \033[31m[failed]\033[0m"
-	kill -TERM "$SystemXLoggerPID" 2>/dev/null
-fi
+	echo -e "Starting System X Reporting Server - disabled by SYSTEMX_RS_NOSTARTUP \033[33m[skipped]\033[0m"
+fi  
 
 echo -e "Preparing System X Reporting Server container SIGTERM handling \033[36m[executing]\033[0m"
 # Prepare for SIGTERM
