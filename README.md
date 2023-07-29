@@ -1,4 +1,4 @@
-# Setting up Cognos Analytics 11.1 in a container environment
+# Setting up Cognos Analytics 11.1 or 11.2.4.1.1 (hapec System X) in a container environment
 ---
 ## Copyright 2019, IBM Corporation
 
@@ -6,6 +6,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 See the License for the specific language governing permissions and limitations under the License.
 
 Written by Philippe Gregoire - IBM Ecosystem Advocacy Group Europe (philippe.gregoire@fr.ibm.com)
+Extended by Michael Sommer - hapec GmbH - IBM ESA Partner / hapec System X
 
 ---
 
@@ -20,6 +21,7 @@ The software licenses and binaries used to build those images can be obtained fr
 
 ## Project structure
 The containers are driven by `docker-compose` configuration files.
-There are currently two setups, refer to the setup instructions in each subfolder:
+There are currently three setups, refer to the setup instructions in each subfolder:
 1. **Cognos Analytics 11.1** with **DB2-Developer-C** in [phg-centos7-xfce-cognos-cloudera/phg-centos7-xfce-cognos](phg-centos7-xfce-cognos-cloudera/phg-centos7-xfce-cognos/README_Cognos_setup_docker.md)
 2. **Cognos Analytics 11.1** with **DB2-Developer-C** and **Cloudera Quickstart 5.13** in [phg-centos7-xfce-cognos-cloudera](phg-centos7-xfce-cognos-cloudera/README_setupCognosCloudera.md)
+3. **Cognos Analytics 11.2.4.1.1** with **Microsoft SQL-Server Express on Linux 2022** in [hapec-SystemX] (no readme yet!)
