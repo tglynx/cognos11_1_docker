@@ -4,7 +4,7 @@ services:
     build: ./mssql
     init: true
     hostname:  mssql
-    image: systemx-contentstore:latest
+    image: ${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_GROUP}/contentstore:latest
     privileged: true
     ports:
       - "1433:1433"
@@ -31,7 +31,7 @@ services:
     hostname: rs
     depends_on:
       - mssql
-    image: systemx-reportingserver:11.2.4.1.1
+    image: ${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_GROUP}/reportingserver:11.2.4.1.1
     ports:
       - "5901:5901"
       - "6901:6901"
