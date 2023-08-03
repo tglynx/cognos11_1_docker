@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Analytic Server Configuration
+Comment=
+Exec=/opt/hapec/SystemX/AnalyticServer/bin64/cogconfig.sh
+Icon=preferences-desktop
+Path=
+Terminal=true
+StartupNotify=false

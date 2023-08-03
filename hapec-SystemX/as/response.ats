@@ -29,7 +29,7 @@ Title=Non IBM License Agreement
 I Agree=y
 [Dialog4]
 Title=Installation Location
-APPDIR=/opt/ibm/cognos/tm1_64
+APPDIR=/opt/hapec/SystemX/AnalyticServer
 BACKUP=0
 PRODUCTION_RADIO=1
 [Component List]
@@ -37,7 +37,7 @@ TM1APPTIER_APP=1
 TM1SERVER_APP=1
 TM1ADMINSERVER_APP=1
 TM1TOOLS_APP=1
-TM1SAMPLE_APP=1
+TM1SAMPLE_APP=0
 PAAAGENT_APP=1
 TM1WEBAPPTIER_APP=1
 TM1CONTRIBGATEWAY_APP=1

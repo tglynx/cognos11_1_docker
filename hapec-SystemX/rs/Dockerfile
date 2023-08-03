@@ -27,7 +27,7 @@ ARG COGNOS_GID=1000
 ARG SYSTEMX_REPOSITORY_PATH=/install/hapec/SystemX
 
 ARG COGNOS_PROPERTIES=cognosca_reponse.properties
-ARG COGNOS_HOST=cognos11srv
+ARG COGNOS_HOST=rs
 
 # IBM Cognos Analytics Installer
 ARG SYSTEMX_INSTALLER_URL=${SYSTEMX_INSTALLER_URL}
@@ -50,7 +50,6 @@ RUN yum install -y \
 	which \
 	unzip \
 	sudo \
-	nano \
 	glibc.x86_64 glibc.i686 glibc-langpack-en \
 	libstdc++.x86_64 libstdc++.i686 \
 	libXtst libX11.so.6 libnsl libnsl.so.1 libstdc++.so.6 \
@@ -61,10 +60,11 @@ RUN yum install -y \
 	xmlstarlet \
 	nc 
 
+# mssql-tools for contentstore check
 RUN curl -# https://packages.microsoft.com/config/rhel/8/prod.repo > /etc/yum.repos.d/mssql-release.repo
-
 RUN ACCEPT_EULA=Y yum install -y mssql-tools
 
+# yum cleanup
 RUN yum clean all && rm -rf /tmp/*
 	
 #zlib fix for cognos confighuration gui
@@ -114,11 +114,11 @@ COPY ${COGNOS_PROPERTIES} ${SYSTEMX_REPOSITORY_PATH}
 # See also: https://www.ibm.com/support/knowledgecenter/en/SSEP7J_11.0.0/com.ibm.swg.ba.cognos.inst_cr_winux.doc/t_inst_response_templates.html
 RUN	mkdir -p "${SYSTEMX_REPORTINGSERVER_PATH}" 
 RUN	chown -R ${COGNOS_USER}:${COGNOS_USER} "${SYSTEMX_BASEPATH}" 
-RUN	chmod -R uo+x "${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_INSTALLER_FILENAME}" 
+RUN	chmod uo+x "${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_INSTALLER_FILENAME}" 
 RUN	echo "Running cognos silent installer with config:" 
-RUN	cat ${SYSTEMX_REPOSITORY_PATH}/${COGNOS_PROPERTIES} 
-RUN	echo REPO=${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_REPORTINGSERVER_REPOSITORY} >>${SYSTEMX_REPOSITORY_PATH}/${COGNOS_PROPERTIES} 
-RUN	echo "BUILD_HOST=`hostname`"> ${SYSTEMX_BASEPATH}/build_host.txt 
+#RUN	cat ${SYSTEMX_REPOSITORY_PATH}/${COGNOS_PROPERTIES} 
+#RUN	echo REPO=${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_REPORTINGSERVER_REPOSITORY} >>${SYSTEMX_REPOSITORY_PATH}/${COGNOS_PROPERTIES} 
+#RUN	echo "BUILD_HOST=`hostname`"> ${SYSTEMX_BASEPATH}/build_host.txt 
 RUN su - ${COGNOS_USER} -c "\"${SYSTEMX_REPOSITORY_PATH}/${SYSTEMX_INSTALLER_FILENAME}\" -f \"${SYSTEMX_REPOSITORY_PATH}/${COGNOS_PROPERTIES}\" -i silent"	
 
 # RUN	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml_`hostname` 
@@ -178,5 +178,5 @@ USER 1000
 # 		/EXEC/ {print "\033[36m" $0 "\033[0m"} \
 # 		!(/INFO/ || /SUCCESS/ || /WARNING/ || /ERROR/ || /EXEC/ ) {print $0}' | awk '{print "\033[32mReporting Server Configuration:\033[0m",$0}' 
 
-# Start Command for the container - Kick-off unattended Cognos configuration
+# Kick-off unattended Cognos configuration
 CMD ["/dockerstartup/cogsetup_wait.sh"]

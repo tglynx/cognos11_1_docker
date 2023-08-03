@@ -41,7 +41,7 @@ services:
       - rs-data:/opt/hapec/SystemX/ReportingServer/data
     stop_grace_period: 300s
     environment:
-       #- SYSTEMX_RS_STARTUP=false
+       - SYSTEMX_RS_STARTUP=true
        - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
        - SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
        - SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
@@ -49,10 +49,53 @@ services:
     #   - SYSTEMX_INSTALLER_FILENAME=${SYSTEMX_INSTALLER_FILENAME}
     #   - SYSTEMX_REPORTINGSERVER_REPOSITORY_URL=${SYSTEMX_REPORTINGSERVER_REPOSITORY_URL}
     #   - SYSTEMX_REPORTINGSERVER_REPOSITORY=${SYSTEMX_REPORTINGSERVER_REPOSITORY}
-#    volumes:
-#      - shared:/shared      
+   
+
+  as:
+    build:
+      context: ./as
+      args:
+        SYSTEMX_JAVA_INSTALLER_URL: ${SYSTEMX_JAVA_INSTALLER_URL}
+        SYSTEMX_JAVA_INSTALLER: ${SYSTEMX_JAVA_INSTALLER}
+        SYSTEMX_ANALYTICSERVER_REPOSITORY_URL: ${SYSTEMX_ANALYTICSERVER_REPOSITORY_URL}
+        SYSTEMX_ANALYTICSERVER_REPOSITORY: ${SYSTEMX_ANALYTICSERVER_REPOSITORY}
+    hostname: as.cognos.local
+#    depends_on:
+#      - rs
+    image: ${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_GROUP}/analyticserver:2.0.9.16
+    ports:
+      - "5495:5495" # TM1 Admin Server plain
+      - "5498:5498" # TM1 Admin Server ssl
+      - "5500:5500" # TM1 Instance hapecAnalyticServer
+      - "5901:5901" # VNC
+      - "6901:6901" # noVNC
+      - "9510:9510" # pmpsvc
+    volumes:
+      - as-configuration:/opt/hapec/SystemX/AnalyticServer/configuration
+      - as-TM1Servers:/TM1Servers
+    stop_grace_period: 300s
+    environment:
+       - SYSTEMX_AS_STARTUP=true
+       - SYSTEMX_AS_IPV4_ADDRESS=${SYSTEMX_AS_IPV4_ADDRESS}
+    networks: 
+       macvlan:
+         ipv4_address: ${SYSTEMX_AS_IPV4_ADDRESS}
+    cap_add:
+      - NET_ADMIN
+
+networks:
+  macvlan:
+    driver: macvlan
+    driver_opts:
+      parent: ens18
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: "192.168.0.254"
 
 volumes:
   mssql-data:
   rs-configuration:
   rs-data:
+  as-configuration:
+  as-TM1Servers:
