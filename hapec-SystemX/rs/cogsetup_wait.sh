@@ -78,6 +78,7 @@ echo -e "Backup System X Reporting Server configuration \033[32m[done]\033[0m"
 
 # Check if the template file exists
 if [ -e "${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml" ]; then
+
     echo -e "Performing initial System X Reporting Server configuration according to docker image \033[36m[executing]\033[0m"
 
 	cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_image_template.xml
@@ -87,9 +88,21 @@ if [ -e "${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml" 
 	# Configure Content Store Password
 	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/password" -v ${SYSTEMX_CONTENTSTORE_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
 
+	## Auth Providers
+	# Cognos
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='Cognos']/crn:parameter[@name='allowAnon']/crn:value" -v ${SYSTEMX_RS_ALLOW_ANONYMOUS_ACCESS} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+
+	# Keycloak
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='keycloak']/crn:parameter[@name='oidcDiscEndpoint']/crn:value" -v ${SYSTEMX_KEYCLOAK_DISCOVERY_ENDPOINT} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='keycloak']/crn:parameter[@name='clientId']/crn:value" -v ${SYSTEMX_KEYCLOAK_CLIENT_IDENTIFIER} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='keycloak']/crn:parameter[@name='returnUrl']/crn:value" -v ${SYSTEMX_KEYCLOAK_RETURN_URL} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='keycloak']/crn:parameter[@name='clientSecret']/crn:value" -v ${SYSTEMX_KEYCLOAK_CLIENT_SECRET} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='keycloak']/crn:parameter[@name='privateKeyPassword']/crn:value" -v ${SYSTEMX_KEYCLOAK_PRIVATE_KEY_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+
 	mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
 
 	echo -e "Initial System X Reporting Server configuration according to docker image \033[32m[done]\033[0m"
+	
 else
     echo -e "Initial System X Reporting Server configuration according to docker image \033[32m[done]\033[0m"
 fi

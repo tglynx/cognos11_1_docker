@@ -1377,6 +1377,369 @@ Master configuration file for all IBM Cognos components.
             <crn:value xsi:type="xsd:boolean">false</crn:value>
           </crn:parameter>
         </crn:instance>
+        <!-- keycloak: Definiert eine Eigenschaftsgruppe, mit der das Produkt einen OpenID Connect-Identitätsprovider 
+             zur Benutzerauthentifizierung verwenden kann.  -->
+        <!-- Legen Sie die Werte für diese Eigenschaftsgruppe fest, um dem Produkt den Zugriff 
+             auf den vorhandenen OpenID Connect-Identitätsprovider zu ermöglichen. Diese externe 
+             Ressource muss in Ihrer Umgebung bereits vorhanden und für die Authentifizierung 
+             konfiguriert sein.  -->
+        <crn:instance name="keycloak" class="OIDC_Generic">
+          <!-- identityProviderType: Gibt die Implementierung eines OpenID Connect-Identitätsproviders 
+               an.  -->
+          <crn:parameter name="identityProviderType">
+            <crn:value xsi:type="xsd:string">Generic</crn:value>
+          </crn:parameter>
+          <!-- id: Legt eine eindeutige ID für den Authentifizierungs-Namespace fest.  -->
+          <!-- Verwenden Sie die Namespace-Identifizierung, um zwischen mehreren Namespaces unterscheiden 
+               zu können. Jeder Namespace muss eine eindeutige Identifizierung haben. Wenn Sie einen 
+               Namespace für die Authentifizierung in der Laufzeitumgebung auswählen, wird die Identifizierung 
+               von den IBM Cognos-Komponenten verwendet. Wird die Namespace-ID nach dem Starten 
+               des Service geändert, dann werden die Objektsicherheitsrichtlinien, die Cognos-Gruppe 
+               und die Rollenmitgliedschaften möglicherweise ungültig. Die Verwendung eines Punktes 
+               in der Namespace-ID wird nicht unterstützt.  -->
+          <crn:parameter name="id">
+            <crn:value xsi:type="xsd:string">keycloak</crn:value>
+          </crn:parameter>
+          <!-- selectableForAuth: Legt fest, ob der Namespace zur Authentifizierung ausgewählt werden 
+               kann.  -->
+          <!-- Wenn diese Eigenschaft auf 'Wahr' eingestellt ist, kann der Namespace in der Namespace-Auswahleingabeaufforderung 
+               auf der Anmeldungsseite zur Authentifizierung verwendet werden. Stellen Sie diesen 
+               Wert auf 'Falsch' ein, wenn der Namespace auf der Anmeldungsseite nicht zur Auswahl 
+               zur Verfügung stehen soll.  -->
+          <crn:parameter name="selectableForAuth">
+            <crn:value xsi:type="xsd:boolean">true</crn:value>
+          </crn:parameter>
+          <!-- advancedProperties: Legt einen Satz mit erweiterten Eigenschaften fest.  -->
+          <!-- Der Benutzer muss für jede erweiterte Eigenschaft einen Namen und einen Wert angeben.  -->
+          <crn:parameter name="advancedProperties" opaque="true">
+            <crn:value xsi:type="cfg:array"/>
+          </crn:parameter>
+          <!-- useDiscoveryEndpoint: Gibt an, ob der Identitätsprovider ein Erkennungsdokument zurückgibt.  -->
+          <!-- Legen Sie für diesen Wert 'wahr' fest, wenn der Identitätsprovider einen Erkennungsdokumentendpunkt 
+               unterstützt, und geben Sie die entsprechenden Werte in der Konfigurationsgruppe mit 
+               Erkennungsendpunkt an. Legen Sie für diesen Wert 'falsch' fest, wenn der Identitätsprovider 
+               keinen Erkennungsdokumentendpunkt unterstützt, und geben Sie die entsprechenden Werte 
+               in der Konfigurationsgruppe ohne Erkennungsendpunkt an.  -->
+          <crn:parameter name="useDiscoveryEndpoint">
+            <crn:value xsi:type="xsd:boolean">true</crn:value>
+          </crn:parameter>
+          <!-- oidcDiscEndpoint: Gibt den Erkennungsendpunkt für OpenID Connect an.  -->
+          <!-- Der Erkennungsendpunkt wird verwendet, um die OpenID Connect-Konfiguration mit dem 
+               Berechtigungsendpunkt, dem Tokenendpunkt, dem JWKS-Endpunkt und dem Aussteller abzurufen.  -->
+          <crn:parameter name="oidcDiscEndpoint">
+            <crn:value xsi:type="cfg:anyPathURI">https://host:443/auth/realms/realm/.well-known/openid-configuration</crn:value>
+          </crn:parameter>
+          <!-- issuer: Gibt den Ersteller der OpenID-Anforderung an.  -->
+          <!-- Eine Zeichenfolge, die den Identitätsprovider darstellt, der die Anforderungen im 
+               ID-Token erstellt hat. Dieser Wert muss mit dem Wert des Eintrags 'iss' im JSON-Dokument 
+               für das ID-Token übereinstimmen.  -->
+          <crn:parameter name="issuer">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- oidcTokenEndpoint: Gibt den OpenID Connect-Tokenendpunkt an. Dabei wird die folgende 
+               Syntax verwendet: https://<Hostname:Port>/<Pfad>  -->
+          <!-- Der Tokenendpunkt wird dazu verwendet, nach einer erfolgreichen Authentifizierung 
+               beim OpenID Connect-Identitätsprovider das Identitätstoken abzurufen.  -->
+          <crn:parameter name="oidcTokenEndpoint">
+            <crn:value xsi:type="cfg:anyPathURI"></crn:value>
+          </crn:parameter>
+          <!-- oidcAuthEndpoint: Gibt den OpenID Connect-Berechtigungsendpunkt an. Dabei wird die 
+               folgende Syntax verwendet: https://<Hostname:Port>/<Pfad>  -->
+          <!-- Beim Berechtigungsendpunkt handelt es sich um eine URL, die der OpenID Connect-Identitätsprovider 
+               zur Authentifizierung verwendet. In den meisten Fällen sollte bei der URL das HTTPS-Schema 
+               verwendet werden. Der Berechtigungsendpunkt wird aufgerufen, wenn Benutzer eine Authentifizierung 
+               beim OpenID Connect-Identitätsprovider durchführen.  -->
+          <crn:parameter name="oidcAuthEndpoint">
+            <crn:value xsi:type="cfg:anyPathURI"></crn:value>
+          </crn:parameter>
+          <!-- clientId: Gibt die Client-ID für OpenID Connect an.  -->
+          <!-- Die Client-ID, die der Anwendung vom OpenID Connect-Identitätsprovider zugewiesen 
+               wird.  -->
+          <crn:parameter name="clientId">
+            <crn:value xsi:type="xsd:string">Client</crn:value>
+          </crn:parameter>
+          <!-- returnUrl: Die Rückgabe-URL, die beim OpenID Connect-Identitätsprovider konfiguriert 
+               ist.  -->
+          <!-- Die Rückgabe-URL, die vom OpenID Connect-Identitätsprovider nach der erfolgreichen 
+               Authentifizierung eines Benutzers aufgerufen wird. Das URL-Format lautet https://dispatcherHOST:dispatcherPORT/bi/completeAuth.jsp 
+               oder https://webserverHOST:webserverPORT/ibmcognos/bi/completeAuth.jsp. Mit dieser 
+               URL wird die Cognos Analytics-Authentifizierung mit dem OpenID Connect-Identitätsprovider 
+               abgeschlossen.  -->
+          <crn:parameter name="returnUrl">
+            <crn:value xsi:type="cfg:anyPathURI">https://rs:9300/bi/completeAuth.jsp</crn:value>
+          </crn:parameter>
+          <!-- authScope: Gibt die Bereichsparameterwerte an, die an den Berechtigungsendpunkt übergeben 
+               werden.  -->
+          <!-- Die Bereichsparameterwerte, die zur Berechtigungsendpunkt-URL für die Authentifizierung 
+               hinzugefügt werden. In der Liste möglicher Bereichswerte muss zumindest 'openid' 
+               enthalten sein.  -->
+          <crn:parameter name="authScope">
+            <crn:value xsi:type="xsd:string">openid</crn:value>
+          </crn:parameter>
+          <!-- accountClaims: Gibt an, ob das ID-Token alle Kontoanforderungen enthält.  -->
+          <!-- Legen Sie für diesen Wert 'Token' fest, wenn das ID-Token alle Benutzeranforderungen 
+               enthält. Legen Sie für diesen Wert 'Benutzerinformationen' fest, wenn ein zusätzlicher 
+               Aufruf an den Benutzerinformationsendpunkt erfolgen soll, um Benutzeranforderungen 
+               abzurufen, die nicht Teil des ID-Tokens sind.  -->
+          <crn:parameter name="accountClaims">
+            <crn:value xsi:type="xsd:string">token</crn:value>
+          </crn:parameter>
+          <!-- tokenEndpointAuth: Gibt an, wie beim Aufrufen des Tokenendpunkts die Authentifizierung 
+               beim Identitätsprovider durchgeführt wird.  -->
+          <!-- Verwenden Sie 'Geheimer Clientschlüssel - POST', wenn die Client-ID und der geheime 
+               Clientschlüssel im Anforderungshauptteil übertragen werden sollen. Verwenden Sie 
+               'Geheimer Clientschlüssel - Basis', wenn die Client-ID und der geheime Clientschlüssel 
+               im HTTP-Header übertragen werden sollen.  -->
+          <crn:parameter name="tokenEndpointAuth">
+            <crn:value xsi:type="xsd:string">client_secret_post</crn:value>
+          </crn:parameter>
+          <!-- clientSecret: Gibt den geheimen Clientschlüssel an, der der Anwendung vom OpenID 
+               Connect-Identitätsprovider zugewiesen wird.  -->
+          <!-- Der geheime Clientschlüssel, der der Anwendung vom OpenID Connect-Identitätsprovider 
+               zugewiesen wird.  -->
+          <crn:parameter name="clientSecret">
+            <crn:value xsi:type="xsd:string">client-secret</crn:value>
+          </crn:parameter>
+          <!-- privateKeyFile: Gibt die Datei an, die den privaten Signierschlüssel enthält.  -->
+          <!-- Die Datei, die den privaten Signierschlüssel im PKCS8-Format enthält. Es muss ein 
+               einzelner privater RSA-Schlüssel mit einer Länge von 2048 Bit enthalten sein.  -->
+          <crn:parameter name="privateKeyFile">
+            <crn:value xsi:type="cfg:filePath"></crn:value>
+          </crn:parameter>
+          <!-- privateKeyPassword: Gibt das Kennwort für den privaten Schlüssel an, mit dem der 
+               private Signierschlüssel geschützt wird.  -->
+          <!-- Dieses Kennwort ist zum Schutz des privaten Schlüssels erforderlich. Es bietet eine 
+               zusätzliche Sicherheitsebene durch die Verschlüsselung der Datei mit dem privaten 
+               Schlüssel anhand eines Kennworts.  -->
+          <crn:parameter name="privateKeyPassword">
+            <crn:value xsi:type="xsd:string">private-key-password</crn:value>
+          </crn:parameter>
+          <!-- privateKeyId: Gibt die Schlüssel-ID an, die sich im JWT-Header befinden muss.  -->
+          <!-- Die Schlüssel-ID, die im JWT-Header 'kid' festgelegt wird. Verwenden Sie dieses Konfigurationselement, 
+               falls der Identitätsprovider die Angabe 'kid' verlangt. Geben Sie keinen Wert an, 
+               falls der Identitätsprovider die Angabe 'kid' nicht verlangt.  -->
+          <crn:parameter name="privateKeyId">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- keyLocation: Gibt die Position des öffentlichen Signierschlüssels oder Zertifikats 
+               an.  -->
+          <!-- Legen Sie für diesen Wert 'Datei' fest, wenn das Signaturzertifikat manuell vom Identitätsprovider 
+               als Zertifikat heruntergeladen und im Dateisystem gespeichert wird. Legen Sie für 
+               diesen Wert 'JWKS-Endpunkt' fest, wenn der Identitätsprovider einen Endpunkt für 
+               das Abrufen von ID-Tokensignaturschlüsseln unterstützt. Hinweis: Wenn der Identitätsprovider 
+               kein Erkennungsdokument unterstützt, aber öffentliche Schlüssel über einen JWKS-Endpunkt 
+               bereitstellt, muss der JWKS-Endpunkt eine gültige URI-Angabe für das Abrufen der 
+               öffentlichen Schlüssel enthalten.  -->
+          <crn:parameter name="keyLocation">
+            <crn:value xsi:type="xsd:string">jwks_uri</crn:value>
+          </crn:parameter>
+          <!-- idpCertificateFile: Gibt die Position des Zertifikats an, das vom OpenID Connect-Identitätsprovider 
+               zum Signieren des Identitätstokens verwendet wird.  -->
+          <!-- Pfad der Datei mit dem Zertifikat, das vom Identitätsprovider zum Signieren des JSON-Web-Tokens 
+               verwendet wird. Der Pfad muss den Zertifikatsdateinamen enthalten und sich an einer 
+               Position befinden, auf den die aktive Cognos Analytics-Instanz zugreifen kann. Das 
+               Zertifikat muss in einem PEM-Format vorliegen, darf nur das Public-Key-Zertifikat 
+               enthalten und muss die Zertifikatsanfangs- und -endzeilen umfassen. Die Zertifikatsdatei 
+               darf sich nicht im Verzeichnis 'configuration/certs' befinden.  -->
+          <crn:parameter name="idpCertificateFile">
+            <crn:value xsi:type="cfg:filePath"></crn:value>
+          </crn:parameter>
+          <!-- jwksEndpoint: Gibt den OpenID Connect-Endpunkt für das Abrufen der JWT-Signierschlüssel 
+               an.  -->
+          <!-- Beim JWKS-Endpunkt handelt es sich um eine URL, die der OpenID-Identitätsprovider 
+               verwendet, um Signierschlüsseldaten bereitzustellen. In den meisten Fällen sollte 
+               bei der URL das HTTPS-Schema verwendet werden. Der JWKS-Endpunkt wird aufgerufen, 
+               wenn ein vom Identitätsprovider zurückgegebenes ID-Token validiert wird.  -->
+          <crn:parameter name="jwksEndpoint">
+            <crn:value xsi:type="cfg:anyPathURI"></crn:value>
+          </crn:parameter>
+          <!-- pgStrategy: Gibt an, wie bei der Verwendung des Kennwortbewilligungsablaufs die Benutzeridentität 
+               ermittelt wird.  -->
+          <!-- Legen Sie für diesen Wert 'ID-Token' fest, wenn alle Benutzeranforderungen im ID-Token 
+               zurückgegeben werden. Legen Sie für diesen Wert 'ID-Token/Benutzerinformationen' 
+               fest, wenn ein ID-Token vom Kennwortbewilligungsablauf zurückgegeben wird, jedoch 
+               nicht alle Benutzeranforderungen enthält. Legen Sie für diesen Wert 'Benutzerinformationen' 
+               fest, wenn das ID-Token keine Benutzeranforderungen enthält und die Benutzeranforderungen 
+               vom Benutzerinformationsendpunkt abgerufen werden sollen. Legen Sie 'Nicht unterstützt' 
+               fest, wenn der Identitätsprovider den Kennwortbewilligungsablauf nicht unterstützt.  -->
+          <crn:parameter name="pgStrategy">
+            <crn:value xsi:type="xsd:string">idToken</crn:value>
+          </crn:parameter>
+          <!-- pgInclScope: Gibt an, dass bei der Verwendung des Kennwortbewilligungsablaufs der 
+               Bereich einbezogen werden soll.  -->
+          <!-- Legen Sie für diesen Wert 'Wahr' fest, um anzugeben, dass der Bereichsparameter als 
+               Teil der Abfragezeichenfolge für den Kennwortbewilligungsablauf einbezogen werden 
+               soll. Legen Sie für diesen Wert 'Falsch' fest, um anzugeben, dass der Bereich nicht 
+               in die Abfragezeichenfolge für den Kennwortbewilligungsablauf einbezogen werden soll.  -->
+          <crn:parameter name="pgInclScope">
+            <crn:value xsi:type="xsd:boolean">true</crn:value>
+          </crn:parameter>
+          <!-- pgAddParams: Gibt zusätzliche Parameter an, die für den Kennwortbewilligungsablauf 
+               erforderlich sind.  -->
+          <!-- Geben Sie mit diesem Wert zusätzliche Parameter an, die als Teil der Abfragezeichenfolge 
+               für den Kennwortbewilligungsablauf einbezogen werden sollen. Der Parameter muss mit 
+               '&' beginnen und URL-codiert sein, damit er sicher in die Abfragezeichenfolge eingefügt 
+               werden kann. Beispiel: Wenn der Parameter 'resource=https://ca.ibm.com' in der Abfragezeichenfolge 
+               erforderlich ist, muss er wie folgt eingegeben werden: '&resource=https%3A%2F%2Fca.ibm.com'.  -->
+          <crn:parameter name="pgAddParams">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- tcStrategy: Gibt die Informationen an, die für die Planung von Jobs gespeichert werden 
+               sollen.  -->
+          <!-- Legen Sie für diesen Wert 'Berechtigungsnachweise' fest, wenn der Identitätsprovider 
+               die Kennwortbewilligung unterstützt und ein gültiges ID-Token zurückgibt, das alle 
+               Benutzeranforderungen in der Antwort enthält. Legen Sie für diesen Wert 'Berechtigungsnachweise 
+               und ID-Token' fest, wenn der Identitätsprovider den Kennwortbewilligungsablauf unterstützt, 
+               jedoch kein gültiges ID-Token in der Antwort zurückgibt oder wenn das ID-Token nicht 
+               alle Benutzeranforderungen unterstützt. Legen Sie für diesen Wert 'Aktualisierungstoken' 
+               fest, wenn der Identitätsprovider den Tokenaktualisierungsablauf unterstützt, ein 
+               nicht ablaufendes Aktualisierungstoken bereitstellt und ein gültiges ID-Token zurückgibt, 
+               das alle Benutzeranforderungen aus dem Tokenaktualisierungsablauf enthält. Legen 
+               Sie 'Nur ID-Token' fest, wenn der Identitätsprovider weder den Kennwortbewilligungsablauf 
+               noch den Tokenaktualisierungsablauf unterstützt (Hinweis: Wird 'Nur ID-Token' festgelegt, 
+               kann nicht verifiziert werden, ob der Benutzer noch vorhanden und beim Identitätsprovider 
+               aktiviert ist).  -->
+          <crn:parameter name="tcStrategy">
+            <crn:value xsi:type="xsd:string">credentials</crn:value>
+          </crn:parameter>
+          <!-- tcAccountClaims: Gibt an, ob das ID-Token alle Kontoanforderungen enthält.  -->
+          <!-- Legen Sie für diesen Wert 'ID-Token' fest, wenn das vom Tokenendpunkt zurückgegebene 
+               ID-Token alle Benutzeranforderungen enthält. Legen Sie für diesen Wert 'Benutzerinformationen' 
+               fest, wenn ein zusätzlicher Aufruf an den Benutzerinformationsendpunkt erforderlich 
+               ist, um alle Benutzeranforderungen abzurufen.  -->
+          <crn:parameter name="tcAccountClaims">
+            <crn:value xsi:type="xsd:string">id_token</crn:value>
+          </crn:parameter>
+          <!-- tenantIdMapping: Gibt an, wie Namespacebenutzer Tenant-IDs zugeordnet werden.  -->
+          <!-- Durch die Angabe eines Werts für diesen Parameter wird die Multi-Tenant-Funktionalität 
+               aktiviert. Die Tenant-ID für einen Benutzer kann mithilfe eines Musters oder einer 
+               Tenant-Providerklasse bestimmt werden. Beim Muster handelt es sich um einen AAA-Servicesuchpfad 
+               für eine Eigenschaft, die eine Tenant-ID definiert. Der Suchpfad muss relativ zu 
+               einem Benutzerkonto angegeben werden. Beispiel: '~/ancestors[2]/defaultName'. Bei 
+               einer Tenant-Providerklasse handelt es sich um eine Java-Klasse, die die ITenantProvider-Schnittstelle 
+               implementiert. Weitere Einzelheiten finden Sie im Installations- und Konfigurationshandbuch.  -->
+          <crn:parameter name="tenantIdMapping" opaque="true">
+            <crn:value xsi:type="cfg:tenancyInfo">
+              <crn:item name="pattern" xsi:type="xsd:string"></crn:item>
+            </crn:value>
+          </crn:parameter>
+          <!-- tenantBoundingSetMapping: Gibt an, wie der einschließende Satz für Tenants für einen 
+               Benutzer bestimmt wird.  -->
+          <!-- Dieser Parameter wird verwendet, wenn die Multi-Tenant-Funktionalität aktiviert ist. 
+               Der einschließende Satz für Tenants kann für einen Benutzer anhand eines Musters 
+               oder anhand einer entsprechenden Providerklasse bestimmt werden. Beim Muster handelt 
+               es sich um einen AAA-Servicesuchpfad für eine Eigenschaft, die einen einschließenden 
+               Satz für Tenants definiert. Der Suchpfad muss relativ zu einem Benutzerkonto angegeben 
+               werden. Beispiel: '˜/parameters/boundingSet'. Bei einer Providerklasse eines einschließenden 
+               Satzes für Tenants handelt es sich um eine Java-Klasse, die die IBoundingSetProvider-Schnittstelle 
+               implementiert. Weitere Einzelheiten finden Sie im Installations- und Konfigurationshandbuch.  -->
+          <crn:parameter name="tenantBoundingSetMapping" opaque="true">
+            <crn:value xsi:type="cfg:tenancyInfo">
+              <crn:item name="pattern" xsi:type="xsd:string"></crn:item>
+            </crn:value>
+          </crn:parameter>
+          <!-- accountCamidProperty: Gibt den Wert an, der zur eindeutigen Identifizierung von Kontoobkjekten 
+               verwendet wird.  -->
+          <!-- Geben Sie entweder eine Objektmodelleigenschaft eines vorhandenen Content Manager-Kontos 
+               (z. B. E-Mail, Benutzername, Standardname usw.) oder den Namen einer konfigurierten 
+               benutzerdefinierten Eigenschaft an. Für alle Konten muss eine Anforderung für eine 
+               Objektmodelleigenschaft eines vorhandenen Content Manager-Kontos oder die konfigurierte 
+               benutzerdefinierte Eigenschaft vom Identitätsprovider zurückgegeben werden. Der ausgewählte 
+               Wert muss für alle Kontoobjekte eindeutig sein. Der ausgewählte Wert muss im Laufe 
+               der Zeit konstant bleiben und es muss eine geringe Wahrscheinlichkeit bestehen, dass 
+               er geändert werden muss. Hinweis: Dieser Wert darf nach der Anfangskonfiguration 
+               des Namespace nicht geändert werden.  -->
+          <crn:parameter name="accountCamidProperty">
+            <crn:value xsi:type="xsd:string">email</crn:value>
+          </crn:parameter>
+          <!-- acEncoding: Gibt an, ob die Anforderungen im ID-Token URL-codiert sind.  -->
+          <!-- Legen Sie für diesen Wert 'Mit URL-Codierung' fest, wenn die Anforderungen im ID-Token 
+               URL-codiert sind. Legen Sie für diesen Wert 'Ohne Codierung' fest, wenn die Anforderungen 
+               im ID-Token nicht codiert sind.  -->
+          <crn:parameter name="acEncoding">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acBusinessPhone: Gibt die OIDC-Anforderung für die Eigenschaft 'Geschäftstelefon' 
+               eines Kontos an.  -->
+          <crn:parameter name="acBusinessPhone">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acContentLocale: Gibt die OIDC-Anforderung für die Eigenschaft 'Inhaltsländereinstellung' 
+               eines Kontos an.  -->
+          <crn:parameter name="acContentLocale">
+            <crn:value xsi:type="xsd:string">locale</crn:value>
+          </crn:parameter>
+          <!-- acDescription: Gibt die OIDC-Anforderung für die Eigenschaft 'Beschreibung' eines 
+               Kontos an.  -->
+          <crn:parameter name="acDescription">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acEmail: Gibt die OIDC-Anforderung für die Eigenschaft 'E-Mail' eines Kontos an.  -->
+          <crn:parameter name="acEmail">
+            <crn:value xsi:type="xsd:string">email</crn:value>
+          </crn:parameter>
+          <!-- acFaxPhone: Gibt die OIDC-Anforderung für die Eigenschaft 'Fax/Telefon' eines Kontos 
+               an.  -->
+          <crn:parameter name="acFaxPhone">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acGivenName: Gibt die OIDC-Anforderung für die Eigenschaft 'Vorname' eines Kontos 
+               an.  -->
+          <crn:parameter name="acGivenName">
+            <crn:value xsi:type="xsd:string">given_name</crn:value>
+          </crn:parameter>
+          <!-- acHomePhone: Gibt die OIDC-Anforderung für die Eigenschaft 'Privattelefon' eines 
+               Kontos an.  -->
+          <crn:parameter name="acHomePhone">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acMemberOf: Gibt die OIDC-Anforderung für die Eigenschaft 'Mitglied von' eines Kontos 
+               an.  -->
+          <crn:parameter name="acMemberOf">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acMobilePhone: Gibt die OIDC-Anforderung für die Eigenschaft 'Mobiltelefon' eines 
+               Kontos an.  -->
+          <crn:parameter name="acMobilePhone">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acName: Gibt die OIDC-Anforderung für die Eigenschaft 'Name' eines Kontos an.  -->
+          <crn:parameter name="acName">
+            <crn:value xsi:type="xsd:string">name</crn:value>
+          </crn:parameter>
+          <!-- acPagerPhone: Gibt die OIDC-Anforderung für die Eigenschaft 'Pager-Telefon' eines 
+               Kontos an.  -->
+          <crn:parameter name="acPagerPhone">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acPostalAddr: Gibt die OIDC-Anforderung für die Eigenschaft 'Adresse' eines Kontos 
+               an.  -->
+          <crn:parameter name="acPostalAddr">
+            <crn:value xsi:type="xsd:string"></crn:value>
+          </crn:parameter>
+          <!-- acProductLocale: Gibt die OIDC-Anforderung für die Eigenschaft 'Produktländereinstellung' 
+               eines Kontos an.  -->
+          <crn:parameter name="acProductLocale">
+            <crn:value xsi:type="xsd:string">locale</crn:value>
+          </crn:parameter>
+          <!-- acSurname: Gibt die OIDC-Anforderung für die Eigenschaft 'Nachname' eines Kontos 
+               an.  -->
+          <crn:parameter name="acSurname">
+            <crn:value xsi:type="xsd:string">family_name</crn:value>
+          </crn:parameter>
+          <!-- acUsername: Gibt die OIDC-Anforderung für die Eigenschaft 'Benutzername' eines Kontos 
+               an.  -->
+          <crn:parameter name="acUsername">
+            <crn:value xsi:type="xsd:string">preffered_username</crn:value>
+          </crn:parameter>
+          <!-- customProperties: Legt einen Satz mit angepassten Eigenschaften fest.  -->
+          <!-- Verwenden Sie diesen Satz von Benutzereigenschaften, um zusätzliche Kontoinformationen 
+               zu definieren. Das Feld "Name" entspricht dem im Konto festgelegten Eigenschaftsnamen, 
+               der "Wert" entspricht dem Anforderungsnamen im ID-Token.  -->
+          <crn:parameter name="customProperties" opaque="true">
+            <crn:value xsi:type="cfg:array"/>
+          </crn:parameter>
+        </crn:instance>
       </crn:instances>
     </crn:value>
   </crn:parameter>
