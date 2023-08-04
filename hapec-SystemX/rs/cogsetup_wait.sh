@@ -49,8 +49,9 @@ echo -e "Starting System X Reporting Server container logging \033[32m[done]\033
 
 echo -e "Configuring System X Reporting Server according to container environment \033[36m[executing]\033[0m"
 
-# Set SYSTEMX_RS_STARTUP to true if it is unset or null
+# set environment parameter defaults
 SYSTEMX_RS_STARTUP=${SYSTEMX_RS_STARTUP:-true}
+SYSTEMX_RS_CONFIG_LOCK_REMOVAL=${SYSTEMX_RS_CONFIG_LOCK_REMOVAL:-false}
 
 echo -e "Backup System X Reporting Server configuration \033[36m[executing]\033[0m"
 cp ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml \
@@ -151,6 +152,12 @@ if [ $SYSTEMX_RS_STARTUP = true ]; then
 		#	sleep 1m
 		#	waitcnt=$(( $waitcnt - 1 ))
 		#done
+
+		if [ $SYSTEMX_RS_CONFIG_LOCK_REMOVAL = true ]; then
+			echo -e "Removing System X Reporting Server configuration lock \033[36m[executing]\033[0m"
+			rm -f ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.lock
+			echo -e "Removing System X Reporting Server configuration lock \033[32m[done]\033[0m"
+		fi
 
 		cd ${SYSTEMX_REPORTINGSERVER_PATH}/bin64
 		./cogconfig.sh -s

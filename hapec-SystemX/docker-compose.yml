@@ -42,6 +42,7 @@ services:
     stop_grace_period: 300s
     environment:
        - SYSTEMX_RS_STARTUP=true
+       - SYSTEMX_RS_CONFIG_LOCK_REMOVAL=false
        - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
        - SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
        - SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
@@ -60,8 +61,8 @@ services:
         SYSTEMX_ANALYTICSERVER_REPOSITORY_URL: ${SYSTEMX_ANALYTICSERVER_REPOSITORY_URL}
         SYSTEMX_ANALYTICSERVER_REPOSITORY: ${SYSTEMX_ANALYTICSERVER_REPOSITORY}
     hostname: as.cognos.local
-#    depends_on:
-#      - rs
+    depends_on:
+      - rs
     image: ${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_GROUP}/analyticserver:2.0.9.16
     ports:
       - "5495:5495" # TM1 Admin Server plain
