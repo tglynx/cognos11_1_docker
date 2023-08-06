@@ -133,9 +133,6 @@ USER 0
 
 # Link zlib fix 
 # from https://www.ibm.com/support/pages/undefined-symbol-gzopen64-version-zlib-error-when-opening-cogconfig
-#RUN cd ${SYSTEMX_ANALYTICSERVER_PATH}/bin64 && \
-#	ln -s -f /opt/zlib-1.2.3.3/libz.so.1.2.3.3 ./libz.so.1
-
 RUN cd ${SYSTEMX_ANALYTICSERVER_PATH}/bin64 && \
 	mv libz.so libz.so.bak && \
 	mv libz.so.1 libz.so.1.bak && \
