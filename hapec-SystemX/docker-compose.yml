@@ -41,8 +41,9 @@ services:
       - rs-data:/opt/hapec/SystemX/ReportingServer/data
     stop_grace_period: 300s
     environment:
-       - SYSTEMX_RS_STARTUP=true
+       - SYSTEMX_RS_STARTUP=false
        - SYSTEMX_RS_CONFIG_LOCK_REMOVAL=false
+       - SYSTEMX_RS_ALLOW_ANONYMOUS_ACCESS=false
        - SYSTEMX_CONTENTSTORE_DATABASE=dbHAPECContentstore
        - SYSTEMX_CONTENTSTORE_USERNAME=${SYSTEMX_CONTENTSTORE_USERNAME}
        - SYSTEMX_CONTENTSTORE_PASSWORD=${SYSTEMX_CONTENTSTORE_PASSWORD}
