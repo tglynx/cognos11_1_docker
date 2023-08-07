@@ -87,6 +87,10 @@ if [ -e "${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml" 
 	# Configure Content Store Password
 	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='CM']/crn:value/crn:instances[@name='database']/crn:instance[@name='dbHAPECContentstore']/crn:parameter[@name='user']/crn:value/credential/password" -v ${SYSTEMX_CONTENTSTORE_PASSWORD} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
 
+	## Auth Providers
+	# Cognos
+	xmlstarlet ed -L -N crn="http://developer.cognos.com/schemas/crconfig/1/" -u "/crn:parameters/crn:parameter[@name='AAA']/crn:value/crn:instances/crn:instance[@name='Cognos']/crn:parameter[@name='allowAnon']/crn:value" -v ${SYSTEMX_RS_ALLOW_ANONYMOUS_ACCESS} ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml
+	
 	mv ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup_template.xml ${SYSTEMX_REPORTINGSERVER_PATH}/configuration/cogstartup.xml
 
 	echo -e "Initial System X Reporting Server configuration according to docker image \033[32m[done]\033[0m"
