@@ -17,7 +17,6 @@ services:
       - MSSQL_PID=Express
     restart: always
 
-    
   rs:
     build:
       context: ./rs
@@ -29,7 +28,7 @@ services:
     hostname: rs
     depends_on:
       - mssql
-    image: ${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_GROUP}/reportingserver:11.2.4.1.1
+    image: ${CONTAINER_REGISTRY}/${CONTAINER_REGISTRY_GROUP}/reportingserver:11.2.4.1.1-keycloak
     ports:
       - "5901:5901"
       - "6901:6901"
